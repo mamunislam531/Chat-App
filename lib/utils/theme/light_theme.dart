@@ -41,8 +41,8 @@ class LightThemes {
       primaryColor: Colors.yellow,
       canvasColor: Colors.redAccent,
       scaffoldBackgroundColor: AppColors.bgLightColor,
-      cardColor: const Color(0xFF6DD0B4),
-      cardTheme: const CardTheme(color: Color(0xFF6DD0B4),),
+      cardColor: const Color(0xFF00A884),
+      cardTheme: const CardTheme(color: Color(0xFF00A884),),
       drawerTheme: const DrawerThemeData(
         backgroundColor: AppColors.secondaryLightColor,
       ));

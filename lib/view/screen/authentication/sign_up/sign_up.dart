@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -10,10 +9,12 @@ import 'package:my_chat/view/common_widget/custom_text.dart';
 import 'package:my_chat/view/screen/authentication/sign_in/sign_in.dart';
 import 'package:my_chat/view/screen/authentication/widget/confirm_password_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/email_field.dart';
+import 'package:my_chat/view/screen/authentication/widget/name_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/password_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/phone_field.dart';
 import 'package:my_chat/view/screen/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:my_chat/view/screen/chat_list/chat_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatelessWidget {
   const SignUp({super.key});
@@ -44,19 +45,11 @@ class SignUp extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  decoration: BoxDecoration(
-                      color: AppColors.cardLightColor,
-                      borderRadius: const BorderRadius.all(Radius.circular(20)),
-                      boxShadow: [
-                        BoxShadow(
-                            offset: const Offset(0, 3),
-                            color: AppColors.appbarLightColor.withOpacity(.5),
-                            blurRadius: 16),
-                      ]),
+                  margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  decoration: BoxDecoration(color: AppColors.cardLightColor, borderRadius: const BorderRadius.all(Radius.circular(20)), boxShadow: [
+                    BoxShadow(offset: const Offset(0, 3), color: AppColors.appbarLightColor.withOpacity(.5), blurRadius: 16),
+                  ]),
                   child: Column(
                     children: [
                       const CustomTextWidget(
@@ -70,6 +63,9 @@ class SignUp extends StatelessWidget {
                         key: signUpController.formKey,
                         child: Column(
                           children: [
+                            NameTextField(
+                              controller: signUpController.nameController,
+                            ),
                             EmailTextField(
                               controller: signUpController.emailController,
                             ),
@@ -79,51 +75,56 @@ class SignUp extends StatelessWidget {
                             PasswordTextField(
                               controller: signUpController,
                               onTap: () {
-                                signUpController.isPasswordEnable.value =
-                                    !signUpController.isPasswordEnable.value;
+                                signUpController.isPasswordEnable.value = !signUpController.isPasswordEnable.value;
                               },
                             ),
-                            ConfirmPasswordTextField(
-                              controller: signUpController,
-                              password:
-                                  signUpController.passwordController.text,
-                              onTap: () {
-                                signUpController.isConfirmPasswordEnable.value =
-                                    !signUpController
-                                        .isConfirmPasswordEnable.value;
-                              },
-                            )
+                            // ConfirmPasswordTextField(
+                            //   controller: signUpController,
+                            //   password:
+                            //       signUpController.passwordController.text,
+                            //   onTap: () {
+                            //     signUpController.isConfirmPasswordEnable.value =
+                            //         !signUpController
+                            //             .isConfirmPasswordEnable.value;
+                            //   },
+                            // )
                           ],
                         ),
                       ),
                       buildSizedBox(height: 25),
                       Obx(() => signUpController.isLoading.value
                           ? const CustomLoadingButton(
-                        buttonWidth: 150,
-                      )
+                              buttonWidth: 150,
+                            )
                           : CustomButton(
-                        text: "Sign Up",
-                        buttonWidth: 150,
-                        onTap: () async {
-                          FocusScope.of(context).unfocus();
-                          // if (!signUpController.formKey.currentState!
-                          //     .validate()) {
-                          //   return;
-                          // }
-                          signUpController.isLoading.value = true;
-                          EasyLoading.show();
-                          await Future.delayed(const Duration(seconds: 1));
-                          EasyLoading.showSuccess("Sign Up Successful");
-                          signUpController.isLoading.value = false;
-                          Get.offAll(const ChatList());
-                        },
-                      )),
+                              text: "Sign Up",
+                              buttonWidth: 150,
+                              onTap: () async {
+
+                                FocusScope.of(context).unfocus();
+                                if (!signUpController.formKey.currentState!
+                                    .validate()) {
+                                  return;
+                                }
+                                signUpController.isLoading.value = true;
+                                bool status = await signUpController.signUpFunction();
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                if (status) {
+                                  prefs.setBool("alreadyLogin", true);
+                                  Get.offAll(const ChatList());
+                                }
+                                // EasyLoading.show();
+                                // await Future.delayed(const Duration(seconds: 1));
+                                // EasyLoading.showSuccess("Sign Up Successful");
+                                // signUpController.isLoading.value = false;
+                                // Get.offAll(const ChatList());
+                              },
+                            )),
                       buildSizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const CustomTextWidget(
-                              text: "Already have an account?  "),
+                          const CustomTextWidget(text: "Already have an account?  "),
                           GestureDetector(
                             onTap: () {
                               Get.off(const SignIn());

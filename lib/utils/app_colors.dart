@@ -8,7 +8,8 @@ class AppColors {
   static const Color primaryLightColor = Color(0xffFFFFFF);
   static const Color secondaryLightColor = Color(0xff207CE2);
   static const Color cardLightColor = Color(0xffFEFEFE);
-  static const Color appbarLightColor = Color(0xFF6DD0B4);
+  // static const Color appbarLightColor = Color(0xFF6DD0B4);
+  static const Color appbarLightColor = Color(0xFF00A884);
   static const Color textLightColor = Color(0xff1A2E35);
   static const Color bg1LightColor = Color(0xff72C1AC);
   static const Color bg2LightColor = Color(0xffFF8450);
