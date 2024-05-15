@@ -16,7 +16,7 @@ class SignUpController extends GetxController {
   RxBool isConfirmPasswordEnable = false.obs;
   RxBool isLoading = false.obs;
 
- Future<bool> signUpFunction() async {
+  Future<bool> signUpFunction() async {
     UserModels userModels = UserModels(
         name: nameController.text,
         id: phoneController.text,
@@ -24,9 +24,9 @@ class SignUpController extends GetxController {
         phone: phoneController.text,
         token: "token",
         password: passwordController.text);
-    EasyLoading.show();
-   var status = await FirebaseService.createAccount(userModels: userModels);
-    EasyLoading.showSuccess("Successful");
+    await EasyLoading.show();
+    var status = await FirebaseService.createAccount(userModels: userModels);
+    await EasyLoading.showSuccess("Successful");
     return status;
   }
 }

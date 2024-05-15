@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:my_chat/controller/ui_controller/sign_up.dart';
 import 'package:my_chat/utils/app_colors.dart';
@@ -7,12 +6,10 @@ import 'package:my_chat/view/common_widget/custom_button.dart';
 import 'package:my_chat/view/common_widget/custom_loading_button.dart';
 import 'package:my_chat/view/common_widget/custom_text.dart';
 import 'package:my_chat/view/screen/authentication/sign_in/sign_in.dart';
-import 'package:my_chat/view/screen/authentication/widget/confirm_password_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/email_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/name_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/password_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/phone_field.dart';
-import 'package:my_chat/view/screen/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:my_chat/view/screen/chat_list/chat_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -100,10 +97,8 @@ class SignUp extends StatelessWidget {
                               text: "Sign Up",
                               buttonWidth: 150,
                               onTap: () async {
-
                                 FocusScope.of(context).unfocus();
-                                if (!signUpController.formKey.currentState!
-                                    .validate()) {
+                                if (!signUpController.formKey.currentState!.validate()) {
                                   return;
                                 }
                                 signUpController.isLoading.value = true;

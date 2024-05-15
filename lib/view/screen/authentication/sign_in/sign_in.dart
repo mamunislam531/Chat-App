@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:my_chat/controller/ui_controller/sign_in.dart';
 import 'package:my_chat/utils/app_colors.dart';
 import 'package:my_chat/view/common_widget/custom_button.dart';
 import 'package:my_chat/view/common_widget/custom_loading_button.dart';
 import 'package:my_chat/view/common_widget/custom_text.dart';
-import 'package:my_chat/view/screen/authentication/sign_up/sign_up.dart';
 import 'package:my_chat/view/screen/authentication/widget/email_field.dart';
 import 'package:my_chat/view/screen/authentication/widget/password_field.dart';
+import 'package:my_chat/view/screen/chat_list/chat_list.dart';
 
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
@@ -22,15 +21,16 @@ class SignIn extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               Container(
-                  height: MediaQuery.of(context).size.height / 2,
+                  height: MediaQuery.of(context).size.height / 1.6,
                   width: MediaQuery.sizeOf(context).width,
                   color: AppColors.bg1LightColor.withOpacity(.89)),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  buildSizedBox(height: size.height / 15),
+                  buildSizedBox(height: size.height / 6),
                   Image.asset(
                     "assets/images/chat.png",
                     height: size.height / 4.5,
@@ -84,16 +84,14 @@ class SignIn extends StatelessWidget {
                                 buttonWidth: 150,
                                 onTap: () async {
                                   FocusScope.of(context).unfocus();
-                                  // if (!signInController.formKey.currentState!
-                                  //     .validate()) {
-                                  //   return;
-                                  // }
-                                  signInController.isLoading.value = true;
-                                  EasyLoading.show();
-                                  await Future.delayed(const Duration(seconds: 1));
-                                  signInController.isLoading.value = false;
-                                  EasyLoading.showSuccess("Login Successful");
-                                  Get.to(const SignUp(), duration: const Duration(seconds: 1));
+                                  if (!signInController.formKey.currentState!.validate()) {
+                                    return;
+                                  }
+                                  bool status = await signInController.signInService();
+                                  if (status) {
+
+                                    Get.offAll(() => const ChatList());
+                                  }
                                 },
                               )),
 
@@ -119,60 +117,6 @@ class SignIn extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                  buildSizedBox(height: 30),
-                  Row(
-                    children: [
-                      Expanded(child: Container(height: 3, color: Colors.grey)),
-                      CustomTextWidget(
-                        text: "  Sign in with  ",
-                        fontWeight: FontWeight.w500,
-                        fontColor: Colors.black.withOpacity(.5),
-                      ),
-                      Expanded(child: Container(height: 3, color: Colors.grey)),
-                    ],
-                  ),
-                  buildSizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          // Get.toNamed(bottomBarScreenPage)
-                        },
-                        child: Row(
-                          children: [
-                            const CircleAvatar(
-                              radius: 20,
-                              foregroundColor: Colors.transparent,
-                              backgroundColor: Colors.transparent,
-                              backgroundImage: AssetImage("assets/images/google.png"),
-                            ),
-                            buildSizedBox(height: 5),
-                            CustomTextWidget(text: "Google", fontColor: Colors.black.withOpacity(.5))
-                          ],
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          // Get.toNamed(bottomBarScreenPage)
-                        },
-                        child: Row(
-                          children: [
-                            const CircleAvatar(
-                                radius: 15,
-                                foregroundColor: Colors.transparent,
-                                backgroundColor: Colors.transparent,
-                                backgroundImage: AssetImage("assets/images/facebook.png")),
-                            const SizedBox(width: 5),
-                            CustomTextWidget(
-                              text: "Facebook",
-                              fontColor: Colors.black.withOpacity(.5),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -43,14 +44,14 @@ class ChatList extends StatelessWidget {
                     height: 70,
                     child: StreamBuilder(
                       stream: FirebaseFirestore.instance.collection("User").snapshots(),
-                      builder: (context,snapshot){
-                        if(snapshot.hasData){
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
                           return ListView.builder(
-                            itemCount: snapshot.data?.docs.length,
+                              itemCount: snapshot.data?.docs.length,
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
-                                return   Padding(
+                                return Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: CircleAvatar(
                                     radius: 25,
@@ -58,9 +59,9 @@ class ChatList extends StatelessWidget {
                                   ),
                                 );
                               });
-                        }else if(snapshot.hasError){
+                        } else if (snapshot.hasError) {
                           return const CustomTextWidget(text: "Error");
-                        }else{
+                        } else {
                           return const CustomTextWidget(text: "No Data Found");
                         }
                       },
@@ -73,52 +74,59 @@ class ChatList extends StatelessWidget {
             ),
           ),
           buildSizedBox(height: 10),
-
-          Expanded(child:  StreamBuilder(
+          Expanded(
+              child: StreamBuilder(
             stream: FirebaseFirestore.instance.collection("User").snapshots(),
-            builder: (context,snapshot){
-              if(snapshot.hasData){
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
                 return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
                     shrinkWrap: true,
                     itemCount: snapshot.data?.docs.length,
                     itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: ListTile(
-                          onTap: (){
-                            Get.to(
-                                ChatScreen(id: "${snapshot.data?.docs[index]['id']}",),
-                              curve: Curves.easeIn,
-                              transition: Transition.fadeIn,
-                              duration: const Duration(milliseconds: 400),
-                            );
-                          },
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-                          tileColor: AppColors.greyColor.withOpacity(.5),
-                          shape: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                          leading: const CircleAvatar(  backgroundImage: NetworkImage("https://avatars.githubusercontent.com/u/106102340?v=4"),
-                          backgroundColor: Colors.red,
+                      if (chatListController.userID.value == snapshot.data?.docs[index]['id'].toString()) {
+                        return const SizedBox();
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: ListTile(
+                            onTap: () {
+                              Get.to(
+                                ChatScreen(
+                                  id: "${snapshot.data?.docs[index]['id']}", myID: chatListController.userID.toString(),
+                                ),
+                                curve: Curves.easeIn,
+                                transition: Transition.fadeIn,
+                                duration: const Duration(milliseconds: 400),
+                              );
+                            },
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
+                            tileColor: AppColors.greyColor.withOpacity(.5),
+                            shape: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                            leading: const CircleAvatar(
+                              backgroundImage: NetworkImage("https://avatars.githubusercontent.com/u/106102340?v=4"),
+                              backgroundColor: Colors.red,
+                            ),
+                            title: CustomTextWidget(
+                              text: "${snapshot.data?.docs[index]['name']}",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            subtitle: CustomTextWidget(
+                              text: "${snapshot.data?.docs[index]['id']}",
+                              fontSize: 13,
+                              fontWeight: FontWeight.w300,
+                            ),
+                            trailing: const CustomTextWidget(
+                              text: "12:36",
+                            ),
                           ),
-                          title:   CustomTextWidget(
-                            text: "${snapshot.data?.docs[index]['name']}",
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          subtitle: CustomTextWidget(
-                            text: "${snapshot.data?.docs[index]['name']}",
-                            fontSize: 13,
-                            fontWeight: FontWeight.w300,
-                          ),
-                          trailing: const CustomTextWidget(
-                            text: "12:36",
-                          ),
-                        ),
-                      );
+                        );
+                      }
                     });
-              }else if(snapshot.hasError){
+              } else if (snapshot.hasError) {
                 return const CustomTextWidget(text: "Error");
-              }else{
+              } else {
                 return const CustomTextWidget(text: "No Data Found");
               }
             },
