@@ -1,19 +1,19 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_chat/controller/ui_controller/chat_screen.dart';
-import 'package:my_chat/model/chat.dart';
 import 'package:my_chat/utils/app_colors.dart';
 import 'package:my_chat/view/common_widget/custom_appbar.dart';
 import 'package:my_chat/view/common_widget/custom_text.dart';
+import 'package:my_chat/view/screen/chat_screen/controller/message_sent.dart';
 import 'package:my_chat/view/screen/chat_screen/widget/message_field.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.id, required this.myID});
-  final String id;
-  final String myID;
+  const ChatScreen({super.key, required this.receiverID, required this.senderID, required this.receiverName});
+  final String receiverID;
+  final String senderID;
+  final String receiverName;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -21,15 +21,18 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   String myDocID = "0";
+  int counter = 0;
 
   void getDocumentNames() async {
-    await FirebaseFirestore.instance.collection('test').get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('chat').get().then((QuerySnapshot querySnapshot) {
+      log('------Document ID: ${querySnapshot.docs}');
       for (var doc in querySnapshot.docs) {
         String documentId = doc.id;
         log('------Document ID: $documentId');
-        if (documentId.contains(widget.id)) {
+        if (documentId.contains(widget.receiverID)) {
           log("______ Found : $documentId");
           myDocID = documentId.toString();
+          setState(() {});
         }
       }
     });
@@ -43,10 +46,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    getDocumentNames();
     ChatScreenController controller = Get.put(ChatScreenController());
     if (myDocID == "0") {
-      myDocID = "${widget.myID}_${widget.id}";
+      myDocID = "${widget.senderID}_${widget.receiverID}";
     }
     return Scaffold(
       appBar: CustomAppBar(
@@ -65,15 +67,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   backgroundImage: AssetImage("assets/images/im.jpeg"),
                 ),
                 buildSizedBox(weight: 10),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomTextWidget(
-                      text: "Imran The Soto Boy",
+                      text: widget.receiverName,
                       fontColor: Colors.white,
                       fontSize: 20,
                     ),
-                    CustomTextWidget(
+                    const CustomTextWidget(
                       text: "last seen today at 2:35 PM",
                       fontColor: AppColors.greyColor,
                     ),
@@ -82,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 const Spacer(),
                 InkWell(
                   onTap: () async {
-                    print("====================");
+                    getDocumentNames();
                   },
                   child: const Icon(
                     Icons.more_vert_sharp,
@@ -102,7 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: StreamBuilder(
                   stream: FirebaseFirestore.instance
-                      .collection("my_chat")
+                      .collection("chat")
                       .doc(myDocID)
                       .collection("collectionPath")
                       .orderBy("dateTime", descending: true)
@@ -110,13 +112,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   builder: (context, snapshot) {
                     var data = snapshot.data?.docs;
                     if (snapshot.hasData) {
-                      print("sfsd");
                       return ListView.builder(
                           padding: const EdgeInsets.all(5),
                           reverse: true,
                           itemCount: data!.length,
                           itemBuilder: (context, index) {
-                            if (data[index]["id"].toString() == widget.myID) {
+                            if (data[index]["id"].toString() == widget.senderID) {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -129,26 +130,27 @@ class _ChatScreenState extends State<ChatScreen> {
                                       children: [
                                         buildSizedBox(weight: 5),
                                         Expanded(
-                                            child: Card(
-                                          shape: const OutlineInputBorder(
-                                              borderSide: BorderSide.none,
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(2),
-                                                topLeft: Radius.circular(10),
-                                                bottomLeft: Radius.circular(10),
-                                                bottomRight: Radius.circular(10),
-                                              )),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: CustomTextWidget(
-                                              text: "${data[index]['message']}",
-                                              fontColor: Colors.white,
-                                              fontSize: 15,
-                                              maxLine: 300,
-                                              fontWeight: FontWeight.w400,
+                                          child: Card(
+                                            shape: const OutlineInputBorder(
+                                                borderSide: BorderSide.none,
+                                                borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(2),
+                                                  topLeft: Radius.circular(10),
+                                                  bottomLeft: Radius.circular(10),
+                                                  bottomRight: Radius.circular(10),
+                                                )),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: CustomTextWidget(
+                                                text: "${data[index]['message']}",
+                                                fontColor: Colors.white,
+                                                fontSize: 15,
+                                                maxLine: 300,
+                                                fontWeight: FontWeight.w400,
+                                              ),
                                             ),
                                           ),
-                                        ))
+                                        )
                                       ],
                                     ),
                                   ),
@@ -251,8 +253,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   // ChatBoxController(linkTap: (){}, cameraTap: (){}),
                   InkWell(
                     onTap: () async {
-                      var model = ChatModels(widget.myID, controller.messageController.text, DateTime.now().toString());
-                      await FirebaseFirestore.instance.collection("my_chat").doc(myDocID).collection("collectionPath").doc().set(model.toJson());
+                      log("======================  widget.myID   ${widget.senderID}  ==============================");
+                      await MessageSentService.messageSentService(
+                          message: controller.messageController.text, docID: myDocID, senderID: widget.senderID);
                       controller.messageController.clear();
                     },
                     child: const CircleAvatar(

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,39 +35,40 @@ class ChatList extends StatelessWidget {
             ),
             surfaceTintColor: Colors.transparent,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 20, left: 10, right: 10),
+              padding: const EdgeInsets.only(bottom: 5, left: 10, right: 10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 70,
-                    child: StreamBuilder(
-                      stream: FirebaseFirestore.instance.collection("User").snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return ListView.builder(
-                              itemCount: snapshot.data?.docs.length,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircleAvatar(
-                                    radius: 25,
-                                    child: Text(index.toString()),
-                                  ),
-                                );
-                              });
-                        } else if (snapshot.hasError) {
-                          return const CustomTextWidget(text: "Error");
-                        } else {
-                          return const CustomTextWidget(text: "No Data Found");
-                        }
-                      },
-                    ),
-                  ),
+                  CustomSearchField(searchClosed: true, onChange: (b) {}, onTap: () {}, controller: chatListController.searchController),
                   buildSizedBox(height: 10),
-                  CustomSearchField(searchClosed: true, onChange: (b) {}, onTap: () {}, controller: chatListController.searchController)
+                  // SizedBox(
+                  //   height: 70,
+                  //   child: StreamBuilder(
+                  //     stream: FirebaseFirestore.instance.collection("User").snapshots(),
+                  //     builder: (context, snapshot) {
+                  //       if (snapshot.hasData) {
+                  //         return ListView.builder(
+                  //             itemCount: snapshot.data?.docs.length ?? 0,
+                  //             shrinkWrap: true,
+                  //             scrollDirection: Axis.horizontal,
+                  //             itemBuilder: (context, index) {
+                  //               return Padding(
+                  //                 padding: const EdgeInsets.all(8.0),
+                  //                 child: CircleAvatar(
+                  //                   radius: 25,
+                  //                   child: Text(index.toString()),
+                  //                 ),
+                  //               );
+                  //             });
+                  //       } else if (snapshot.hasError) {
+                  //         return const CustomTextWidget(text: "Error");
+                  //       } else {
+                  //         return const CustomTextWidget(text: "No Data Found");
+                  //       }
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -93,7 +93,9 @@ class ChatList extends StatelessWidget {
                             onTap: () {
                               Get.to(
                                 ChatScreen(
-                                  id: "${snapshot.data?.docs[index]['id']}", myID: chatListController.userID.toString(),
+                                  receiverID: "${snapshot.data?.docs[index]['id']}",
+                                  senderID: chatListController.userID.toString(),
+                                  receiverName: "${snapshot.data?.docs[index]['name']}",
                                 ),
                                 curve: Curves.easeIn,
                                 transition: Transition.fadeIn,

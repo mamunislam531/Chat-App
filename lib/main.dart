@@ -6,8 +6,6 @@ import 'package:get/get.dart';
 import 'package:my_chat/utils/localization.dart';
 import 'package:my_chat/utils/settings/easyloading_settings.dart';
 import 'package:my_chat/utils/theme/light_theme.dart';
-import 'package:my_chat/view/screen/authentication/sign_in/sign_in.dart';
-import 'package:my_chat/view/screen/authentication/sign_up/sign_up.dart';
 import 'package:my_chat/view/screen/splash/splash.dart';
 import 'controller/firebase/firebase_setting.dart';
 
