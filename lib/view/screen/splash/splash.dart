@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_chat/utils/app_colors.dart';
+import 'package:my_chat/view/screen/authentication/sign_in/sign_in.dart';
 import 'package:my_chat/view/screen/authentication/sign_up/sign_up.dart';
 import 'package:my_chat/view/screen/chat_list/chat_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         if (prefs.getBool("alreadyLogin") ?? false == true) {
           Get.to(const ChatList());
         } else {
-          Get.to(const SignUp());
+          Get.to(const SignIn());
         }
       }
     });

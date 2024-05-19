@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_chat/controller/ui_controller/chat_screen.dart';
@@ -7,6 +8,7 @@ import 'package:my_chat/utils/app_colors.dart';
 import 'package:my_chat/view/common_widget/custom_appbar.dart';
 import 'package:my_chat/view/common_widget/custom_text.dart';
 import 'package:my_chat/view/screen/chat_screen/controller/message_sent.dart';
+import 'package:my_chat/view/screen/chat_screen/widget/bottom_sheet.dart';
 import 'package:my_chat/view/screen/chat_screen/widget/message_field.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -64,7 +66,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 buildSizedBox(weight: 10),
                 const CircleAvatar(
                   radius: 25,
-                  backgroundImage: AssetImage("assets/images/im.jpeg"),
+                  backgroundImage:
+                      NetworkImage("https://static.vecteezy.com/system/resources/previews/011/459/666/original/people-avatar-icon-png.png"),
                 ),
                 buildSizedBox(weight: 10),
                 Column(
@@ -76,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       fontSize: 20,
                     ),
                     const CustomTextWidget(
-                      text: "last seen today at 2:35 PM",
+                      text: "last message at 2:35 PM",
                       fontColor: AppColors.greyColor,
                     ),
                   ],
@@ -139,16 +142,32 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   bottomLeft: Radius.circular(10),
                                                   bottomRight: Radius.circular(10),
                                                 )),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: CustomTextWidget(
-                                                text: "${data[index]['message']}",
-                                                fontColor: Colors.white,
-                                                fontSize: 15,
-                                                maxLine: 300,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
+                                            child: "${data[index]['message_type']}" == "image"
+                                                ? FadeInImage.assetNetwork(
+                                                    height: 50,
+                                                    width: 100,
+                                                    fit: BoxFit.cover,
+                                                    placeholder: "assets/images/no_image.png",
+                                                    image: "${data[index]['message_type']}",
+                                                    imageErrorBuilder: (context, o, t) {
+                                                      return Image.asset(
+                                                        "assets/images/no_image.png",
+                                                        fit: BoxFit.fill,
+                                                        height: 100,
+                                                        width: 120,
+                                                      );
+                                                    },
+                                                  )
+                                                : Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: CustomTextWidget(
+                                                      text: "${data[index]['message']}",
+                                                      fontColor: Colors.white,
+                                                      fontSize: 15,
+                                                      maxLine: 300,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                  ),
                                           ),
                                         )
                                       ],
@@ -247,15 +266,35 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  MessageField(
-                    messageController: controller.messageController,
+                  InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                            // isScrollControlled: true,
+                            context: context,
+                            builder: (builder) {
+                              return MyBottomSheet(
+                                controller: controller,
+                                myDocID: myDocID,
+                                senderID: widget.senderID,
+                              );
+                            });
+                      },
+                      child: const Icon(
+                        Icons.more_vert_sharp,
+                        color: Colors.white,
+                        size: 30,
+                      )),
+                  Expanded(
+                    child: MessageField(
+                      messageController: controller.messageController,
+                    ),
                   ),
                   // ChatBoxController(linkTap: (){}, cameraTap: (){}),
                   InkWell(
                     onTap: () async {
                       log("======================  widget.myID   ${widget.senderID}  ==============================");
                       await MessageSentService.messageSentService(
-                          message: controller.messageController.text, docID: myDocID, senderID: widget.senderID);
+                          message: controller.messageController.text, docID: myDocID, senderID: widget.senderID, messageType: 'text');
                       controller.messageController.clear();
                     },
                     child: const CircleAvatar(
